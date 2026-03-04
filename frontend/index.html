@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистичні дані для підготовки АРВ</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Choices.js for searchable multi-select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0b0e14;
+            --card-bg: #161b22;
+            --text-main: #adbac7;
+            --text-bright: #cdd9e5;
+            --accent: #316dca;
+            --accent-hover: #4c8bed;
+            --border: #444c56;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            color: var(--text-bright);
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-main);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-bright);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        /* Override Choices.js styles to match dark theme */
+        .choices__inner {
+            background-color: var(--bg-color) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            color: var(--text-main) !important;
+            padding: 4px 8px !important;
+        }
+        .choices__input {
+            background-color: transparent !important;
+            color: var(--text-bright) !important;
+            font-size: 14px !important;
+        }
+        .choices__list--dropdown {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-main) !important;
+        }
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: var(--accent) !important;
+            color: white !important;
+        }
+        .choices__list--multiple .choices__item {
+            background-color: var(--accent) !important;
+            border: 1px solid var(--accent) !important;
+            border-radius: 4px !important;
+        }
+        .choices[data-type*="select-multiple"] .choices__button {
+            border-left: 1px solid rgba(255,255,255,0.3) !important;
+        }
+        .choices__placeholder {
+            opacity: 0.5 !important;
+            color: var(--text-main) !important;
+        }
+
+        select {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:disabled {
+            background-color: var(--border);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: center;
+            color: #768390;
+        }
+
+        .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+        }
+        .status-error { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.4); }
+        .status-success { background: rgba(63, 185, 80, 0.1); color: #3fb950; border: 1px solid rgba(63, 185, 80, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Статистичні дані для підготовки АРВ</h1>
+            <p class="subtitle">Версія 0.1, доступні дані Держстату про кількість та розмір підприємств за 4-значним КВЕД за період 2012-2024</p>
+            
+            <form id="arvForm">
+                <div class="form-group">
+                    <label for="kvedSelect">Оберіть до 5 КВЕД зі списку</label>
+                    <select id="kvedSelect" multiple required>
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="startYear">Початковий рік</label>
+                        <select id="startYear"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="endYear">Кінцевий рік</label>
+                        <select id="endYear"></select>
+                    </div>
+                </div>
+                
+                <button type="submit" id="submitBtn">
+                    <span>Створити і завантажити DOCX</span>
+                    <div class="spinner" id="btnSpinner"></div>
+                </button>
+            </form>
+            
+            <div id="statusBox" class="status"></div>
+            
+            <p class="footer-note">Створення документа триває близько хвилини</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        let kvedChoices;
+
+        // Populate Years
+        const startSelect = document.getElementById('startYear');
+        const endSelect = document.getElementById('endYear');
+        for (let y = 2012; y <= 2024; y++) {
+            startSelect.add(new Option(y, y));
+            endSelect.add(new Option(y, y));
+        }
+        startSelect.value = 2020;
+        endSelect.value = 2024;
+
+        // Initialize searchable multi-select
+        async function initApp() {
+            const kvedSelect = document.getElementById('kvedSelect');
+            kvedChoices = new Choices(kvedSelect, {
+                removeItemButton: true,
+                maxItemCount: 5,
+                searchPlaceholderValue: "Пошук КВЕД...",
+                noChoicesText: 'Завантаження...',
+                itemSelectText: '',
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/kveds`);
+                const data = await res.json();
+                // Ensure kved value is a string to match backend expectation
+                const list = data.map(k => ({ value: String(k.kved), label: k.full }));
+                kvedChoices.setChoices(list, 'value', 'label', true);
+            } catch (err) {
+                showStatus("Помилка зв'язку з сервером", "error");
+            }
+        }
+
+        function showStatus(msg, type) {
+            const box = document.getElementById('statusBox');
+            box.innerText = msg;
+            box.className = `status status-${type}`;
+            box.style.display = 'block';
+        }
+
+        document.getElementById('arvForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const selectedKveds = kvedChoices.getValue(true);
+            if (selectedKveds.length === 0) return;
+
+            const btn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('btnSpinner');
+            const statusBox = document.getElementById('statusBox');
+
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            statusBox.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/generate-docx`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        kveds: selectedKveds,
+                        start_year: parseInt(startSelect.value),
+                        end_year: parseInt(endSelect.value)
+                    })
+                });
+if (response.ok) {
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Статистика_АРВ_${new Date().getTime()}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showStatus("Документ сформовано", "success");
+    } else {
+
+    const errData = await response.json();
+    let msg = errData.detail || "Помилка сервера";
+    if (typeof msg === 'object') msg = JSON.stringify(msg);
+    throw new Error(msg);
+}
+} catch (err) {
+console.error(err);
+showStatus(`Помилка: ${err.message}`, "error");
+} finally {
+
+                btn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        };
+
+        initApp();
+    </script>
+</body>
+</html>
