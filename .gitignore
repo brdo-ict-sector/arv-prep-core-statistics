@@ -13,3 +13,6 @@ data/statistics.db
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Local server config (nginx symlink)
+sites-enabled
